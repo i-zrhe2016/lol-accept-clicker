@@ -1,0 +1,36 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyautogui pillow rapidocr-onnxruntime numpy pyinstaller
+
+      - name: Build EXE
+        run: >
+          pyinstaller --noconfirm --onefile --console --name "lol-accept"
+          --hidden-import=rapidocr_onnxruntime
+          --hidden-import=onnxruntime
+          --collect-all rapidocr_onnxruntime
+          --collect-all onnxruntime
+          accept_clicker.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lol-accept-windows
+          path: dist/lol-accept.exe
